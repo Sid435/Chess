@@ -1,0 +1,15 @@
+#game-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    width: 300px;
+    height: 300px;
+    border: 1px solid #000;
+}
+
+.grid-cell {
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
