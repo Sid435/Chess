@@ -12,12 +12,12 @@ public class UserService {
 
     @Autowired
     private final UserRepository repository;
-    public void saveUser(User user){ // Getting all the info of the user from the payload then making the user status "ONLINE"
+    public void saveUser(User user){
         user.setStatus(Status.ONLINE);
         repository.save(user);
     }
 
-    public void disconnect(User user){ // Getting the user by ID and then updating the status of the user to "OFFLINE"
+    public void disconnect(User user){
         var stored = repository.findById(user.getId())
                 .orElse(null);
         if(stored!= null){
