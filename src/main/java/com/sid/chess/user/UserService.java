@@ -18,7 +18,7 @@ public class UserService {
     }
 
     public void disconnect(User user){ // Getting the user by ID and then updating the status of the user to "OFFLINE"
-        var stored = repository.findById(user.getNickName())
+        var stored = repository.findById(user.getId())
                 .orElse(null);
         if(stored!= null){
             stored.setStatus(Status.OFFLINE);
