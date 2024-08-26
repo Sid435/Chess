@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game</title>
+    <title>Chess Game - Login</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to 5x5 Chess</h1>
-        <input type="text" id="username" placeholder="Enter your name">
-        <button onclick="startApp()">Enter</button>
-    </div>
-    <script>
-        function startApp() {
-            const username = document.getElementById('username').value;
-            if (username) {
-                localStorage.setItem('username', username);
-                window.location.href = 'user-list.html';
-            } else {
-                alert('Please enter a username');
-            }
-        }
-    </script>
+<div class="container">
+    <h1>Welcome to 5x5 Chess</h1>
+    <input type="text" id="username" placeholder="Enter your name">
+    <button onclick="login()">Enter</button>
+</div>
+<script src="./js/login.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-package com.sid.chess.user;
+package com.sid.chess.user.model;
 
 public enum Status {
     ONLINE, OFFLINE

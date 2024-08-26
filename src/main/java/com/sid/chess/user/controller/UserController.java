@@ -1,0 +1,51 @@
+package com.sid.chess.user.controller;
+
+
+import com.sid.chess.user.model.GameRequest;
+import com.sid.chess.user.model.GameResponse;
+import com.sid.chess.user.model.User;
+import com.sid.chess.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+public class UserController {
+
+    public final UserService service;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    @MessageMapping("/game_request")
+    public void sendGameRequest(@Payload GameRequest gameRequest){
+        simpMessagingTemplate.convertAndSendToUser(gameRequest.getDefender_id(), "/queue/challenge", gameRequest.getMessage());
+    }
+
+    @MessageMapping("/game_response")
+    public void sendGameResponse(@Payload GameResponse gameResponse){
+        simpMessagingTemplate.convertAndSendToUser(gameResponse.getAttacker_id(), "/topic/response", gameResponse.isAccepted());
+    }
+
+    @MessageMapping("/addUser")
+    @SendTo("/topic/user") // will be sent to all the users who have subscribed to this endpoint
+    public ResponseEntity<User> postUser(@Payload User user){
+        return ResponseEntity.ok(service.addUser(user));
+    }
+
+    @MessageMapping("/disconnect")
+    @SendTo("/topic/user")
+    public ResponseEntity<User> disconnectUser(@Payload User user){
+        return ResponseEntity.ok(service.disconnect(user));
+    }
+    @GetMapping("/getUsers")
+    public ResponseEntity<List<User>> getAllUsers(){
+        return ResponseEntity.ok(service.findConnectedUsers());
+    }
+}

@@ -11,9 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let playerId = null; // Unique player identifier
     let stompClient = null;
 
-    // Connect to WebSocket and establish STOMP client
     function connect() {
-        const socket = new SockJS('http://localhost:8080/ws'); // WebSocket endpoint
+        const socket = new SockJS('http://localhost:8080/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
@@ -21,24 +20,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Determine if a game should be created or joined
     function handleGameSetup() {
         stompClient.send("/app/checkGameRoom", {}, {});
         stompClient.subscribe('/topic/checkGameRoomResponse', function (response) {
             const message = JSON.parse(response.body);
             if (message.gameExists) {
-                // Join existing game
                 gameId = message.gameId;
                 playerId = message.playerId;
                 subscribeToGameRoom();
             } else {
-                // Create new game
                 createGame();
             }
         });
     }
 
-    // Create a new game if no existing game is found
     function createGame() {
         stompClient.send("/app/createGameRoom", {}, JSON.stringify({}));
         stompClient.subscribe('/topic/createGameRoomResponse', function (response) {
@@ -49,15 +44,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Subscribe to game room updates
     function subscribeToGameRoom() {
+        stompClient.subscribe('/topic/game/' + gameId + '/start', function(message) {
+            const gameData = JSON.parse(message.body);
+            initializeGame(gameData);
+        });
+
         stompClient.subscribe('/topic/game/' + gameId, function (message) {
             const gameRoom = JSON.parse(message.body);
             updateGameState(gameRoom);
         });
     }
 
-    // Update the game state based on the server response
+    function initializeGame(gameData) {
+        boardMatrix = gameData.initialBoard;
+        currentPlayer = gameData.startingPlayer;
+        playerId = gameData.playerId;
+        initializeBoard();
+    }
+
     function updateGameState(gameRoom) {
         boardMatrix = gameRoom.gameRoomPiecesCurrentLocation;
         currentPlayer = gameRoom.currentTurn === gameRoom.attackerId ? 'A' : 'B';
@@ -65,15 +70,14 @@ document.addEventListener("DOMContentLoaded", function () {
         initializeBoard();
     }
 
-    // Initialize the board UI
     function initializeBoard() {
-        chessboard.innerHTML = ''; // Clear previous board
+        chessboard.innerHTML = '';
         boardMatrix.forEach((row, rowIndex) => {
             row.forEach((piece, colIndex) => {
                 const index = rowIndex * 5 + colIndex;
                 const cell = document.createElement("div");
                 cell.setAttribute("data-index", index);
-                cell.textContent = piece || ''; // Display piece or empty
+                cell.textContent = piece || '';
                 if (piece) cell.classList.add(piece.startsWith('A') ? 'playerA' : 'playerB');
                 cell.addEventListener("click", () => onCellClick(index));
                 chessboard.appendChild(cell);
@@ -81,13 +85,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Handle clicks on board cells
     function onCellClick(index) {
         const [row, col] = [Math.floor(index / 5), index % 5];
         const piece = boardMatrix[row][col];
 
         if (piece && piece.startsWith(currentPlayer)) {
-            // Selecting a piece
             selectedPiece = piece;
             selectedIndex = index;
             selectedPieceDisplay.textContent = `Selected: ${piece}`;
@@ -95,12 +97,10 @@ document.addEventListener("DOMContentLoaded", function () {
             highlightCell(index, 'selected');
             highlightPossibleMoves(index, piece);
         } else if (document.querySelector(`.chessboard div[data-index="${index}"]`).classList.contains('highlight')) {
-            // Moving a piece
             movePieceTo(index);
         }
     }
 
-    // Move a piece to a new location
     function movePieceTo(newIndex) {
         if (stompClient) {
             const move = {
@@ -113,18 +113,22 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Clear all highlights on the board
     function clearHighlights() {
         document.querySelectorAll('.chessboard div').forEach(div => {
             div.classList.remove('selected', 'highlight');
         });
     }
 
-    // Highlight a specific cell on the board
     function highlightCell(index, className) {
         const cell = document.querySelector(`.chessboard div[data-index="${index}"]`);
         if (cell) cell.classList.add(className);
     }
 
-    connect(); // Start the WebSocket connection when the page loads
+    function highlightPossibleMoves(index, piece) {
+        // Implement logic to highlight possible moves based on piece type
+        // This is a placeholder and needs to be implemented based on your game rules
+        console.log("Highlighting possible moves for", piece, "at index", index);
+    }
+
+    connect();
 });

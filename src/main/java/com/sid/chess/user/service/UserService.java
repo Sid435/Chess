@@ -1,7 +1,10 @@
-package com.sid.chess.user;
+package com.sid.chess.user.service;
 
+
+import com.sid.chess.user.model.Status;
+import com.sid.chess.user.model.User;
+import com.sid.chess.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,11 +12,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    @Autowired
     private final UserRepository repository;
 
-    public User saveUser(User user) {
+    public User addUser(User user){
         user.setStatus(Status.ONLINE);
         return repository.save(user);
     }
@@ -29,8 +30,6 @@ public class UserService {
     }
 
     public List<User> findConnectedUsers() {
-        List<User> a =  repository.findByStatus(Status.ONLINE);
-        System.out.println(a);
-        return a;
+        return repository.findByStatus(Status.ONLINE);
     }
 }

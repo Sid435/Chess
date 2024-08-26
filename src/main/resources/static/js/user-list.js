@@ -6,11 +6,9 @@ function connect() {
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/users', function (message) {
-            updateUserList(JSON.parse(message.body));
-        });
         registerUser();
-        fetchActiveUsers(); // Move this here to ensure connection is established
+        fetchActiveUsers();
+        subscribeToPersonalQueue();
     });
 }
 
@@ -19,8 +17,6 @@ function registerUser() {
     if (userName) {
         currentUser = { id: Date.now().toString(), fullName: userName, status: 'ONLINE' };
         stompClient.send("/app/user/addUser", {}, JSON.stringify(currentUser));
-        document.querySelector('h1').textContent = `Welcome, ${userName}!`;
-        fetchActiveUsers();
     } else {
         window.location.href = 'index.html';
     }
@@ -29,39 +25,66 @@ function registerUser() {
 function fetchActiveUsers() {
     fetch('http://localhost:8080/users')
         .then(response => response.json())
-        .then(users => {
-            updateUserList(users);
-        })
-        .catch(error => {
-            console.error('Error fetching users:', error);
-            // Optionally display an error message to the user
-        });
+        .then(users => updateUserList(users))
+        .catch(error => console.error('Error fetching users:', error));
 }
 
 function updateUserList(users) {
-    console.log('Updating user list with:', users);
     const userList = document.getElementById('user-list');
     userList.innerHTML = '';
 
-    const userArray = Array.isArray(users) ? users : [users];
-
-    userArray.forEach(user => {
+    users.forEach(user => {
         if (user.id !== currentUser.id) {
             const userElement = document.createElement('div');
             userElement.classList.add('user-item');
             userElement.textContent = user.fullName;
-            userElement.onclick = () => startGame(user.id);
+            userElement.onclick = () => sendGameRequest(user.id);
             userList.appendChild(userElement);
         }
     });
 }
 
-function startGame(opponentId) {
-    stompClient.send("/app/createGameRoom", {}, JSON.stringify({
-        attackerId: currentUser.id,
-        defenderId: opponentId
+function sendGameRequest(opponentId) {
+    stompClient.send("/app/gameRequest", {}, JSON.stringify({
+        senderId: currentUser.id,
+        receiverId: opponentId
     }));
-    localStorage.setItem('gameRoomId', `${currentUser.id}_${opponentId}`);
+}
+
+function subscribeToPersonalQueue() {
+    stompClient.subscribe('/user/queue/gameRequest', function(message) {
+        const request = JSON.parse(message.body);
+        if (confirm(`${request.senderName} has invited you to play. Accept?`)) {
+            acceptGameRequest(request);
+        } else {
+            declineGameRequest(request);
+        }
+    });
+
+    stompClient.subscribe('/user/queue/gameResponse', function(message) {
+        alert(message.body);
+    });
+}
+
+function acceptGameRequest(request) {
+    stompClient.send("/app/gameResponse", {}, JSON.stringify({
+        senderId: request.senderId,
+        receiverId: currentUser.id,
+        accepted: true
+    }));
+    startGame(request.senderId, currentUser.id);
+}
+
+function declineGameRequest(request) {
+    stompClient.send("/app/gameResponse", {}, JSON.stringify({
+        senderId: request.senderId,
+        receiverId: currentUser.id,
+        accepted: false
+    }));
+}
+
+function startGame(player1Id, player2Id) {
+    localStorage.setItem('gameRoomId', `${player1Id}_${player2Id}`);
     window.location.href = 'game.html';
 }
 
