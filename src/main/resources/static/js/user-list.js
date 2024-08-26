@@ -43,7 +43,6 @@ function updateUserList(users) {
     const userList = document.getElementById('user-list');
     userList.innerHTML = '';
 
-    // Ensure users is always an array
     const userArray = Array.isArray(users) ? users : [users];
 
     userArray.forEach(user => {
