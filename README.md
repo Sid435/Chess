@@ -56,16 +56,15 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/turn-based-chess-game.git
-   cd turn-based-chess-game
+   git clone https://github.com/sid435/Chess.git
+   cd Chess
    ```
 
 2. **Run the Server**
    - Navigate to the server directory and compile the Java files:
      ```bash
-     cd server
-     javac GameServer.java GameRoom.java
-     java GameServer
+     docker-compose up -d
+     ./mvnw spring-boot:run
      ```
    - The server will start and listen for WebSocket connections.
 
@@ -85,7 +84,7 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 
 ## Contact
 
-For any questions or issues, please contact [your email](siddharthkumar435@gmail.com).
+For any questions or issues, please contact [email](siddharthkumar435@gmail.com).
 
 ---
 
