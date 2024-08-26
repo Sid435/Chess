@@ -12,12 +12,14 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:63342/ws")
 public class UserController {
 
     public final UserService service;

@@ -30,6 +30,8 @@ public class UserService {
     }
 
     public List<User> findConnectedUsers() {
-        return repository.findByStatus(Status.ONLINE);
+        List<User> a =  repository.findByStatus(Status.ONLINE);
+        System.out.println(a);
+        return a;
     }
 }
