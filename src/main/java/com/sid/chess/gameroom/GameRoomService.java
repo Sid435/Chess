@@ -20,40 +20,45 @@ public class GameRoomService {
     ){
         return gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId)
                 .map(GameRoom::getGameId)
-                        .or(()->{
-                            if(createGameRoomIfNotExists){
-                                var gameId = createGameId(attackerId, defenderId);
-                                return Optional.of(gameId);
-                            }
-                            return Optional.empty();
-                        });
+                .or(()->{
+                    if(createGameRoomIfNotExists){
+                        var gameId = createGameRoom(attackerId, defenderId).getGameId();
+                        return Optional.of(gameId);
+                    }
+                    return Optional.empty();
+                });
     }
 
-    public String createGameId(String attackerId, String defenderId){
+    public GameRoom createGameRoom(String attackerId, String defenderId) {
         var gameId = String.format("%s_%s", attackerId, defenderId);
 
-        GameRoom attackerGameRoom = GameRoom.builder()
+        GameRoom gameRoom = GameRoom.builder()
                 .gameId(gameId)
                 .attackerId(attackerId)
                 .defenderId(defenderId)
+                .currentTurn(attackerId)
+                .status("ongoing")
                 .build();
 
-        GameRoom defenderGameRoom = GameRoom.builder()
+        GameRoom gameRoom_2 = GameRoom.builder()
                 .gameId(gameId)
                 .attackerId(defenderId)
                 .defenderId(attackerId)
+                .currentTurn(defenderId)
+                .status("ongoing")
                 .build();
 
-        gameRoomRepository.save(attackerGameRoom);
-        gameRoomRepository.save(defenderGameRoom);
+        gameRoomRepository.save(gameRoom);
+        gameRoomRepository.save(gameRoom_2);
 
-        return gameId;
+        return gameRoom;
     }
 
     public void finishGame(String attackerId, String defenderId){
-        Optional<GameRoom> attackerGameRomm = gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId);
-        Optional<GameRoom> defenderGameRomm = gameRoomRepository.findByAttackerIdAndDefenderId(defenderId, attackerId);
-        attackerGameRomm.ifPresent(gameRoomRepository::delete);
-        defenderGameRomm.ifPresent(gameRoomRepository::delete);
+        Optional<GameRoom> gameRoom = gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId);
+        gameRoom.ifPresent(room -> {
+            room.setStatus("finished");
+            gameRoomRepository.save(room);
+        });
     }
 }

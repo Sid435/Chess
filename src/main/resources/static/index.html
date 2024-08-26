@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chess</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <div id="game-grid">
-        <!-- Game grid setup -->
+    <div class="container">
+        <h1>Welcome to 5x5 Chess</h1>
+        <input type="text" id="username" placeholder="Enter your name">
+        <button onclick="startApp()">Enter</button>
     </div>
-    <script src="app.js"></script>
+    <script>
+        function startApp() {
+            const username = document.getElementById('username').value;
+            if (username) {
+                localStorage.setItem('username', username);
+                window.location.href = 'user-list.html';
+            } else {
+                alert('Please enter a username');
+            }
+        }
+    </script>
 </body>
 </html>

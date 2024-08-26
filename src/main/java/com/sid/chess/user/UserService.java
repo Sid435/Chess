@@ -12,21 +12,25 @@ public class UserService {
 
     @Autowired
     private final UserRepository repository;
-    public void saveUser(User user){
+
+    public User saveUser(User user) {
         user.setStatus(Status.ONLINE);
-        repository.save(user);
+        return repository.save(user);
     }
 
-    public void disconnect(User user){
+    public User disconnect(User user) {
         var stored = repository.findById(user.getId())
                 .orElse(null);
-        if(stored!= null){
+        if (stored != null) {
             stored.setStatus(Status.OFFLINE);
-            repository.save(stored);
+            return repository.save(stored);
         }
-
+        return user;
     }
-    public List<User> findConnectedUsers(){ // finding all the users whose status is "ONLINE"
-        return repository.findByStatus(Status.ONLINE);
+
+    public List<User> findConnectedUsers() {
+        List<User> a =  repository.findByStatus(Status.ONLINE);
+        System.out.println(a);
+        return a;
     }
 }

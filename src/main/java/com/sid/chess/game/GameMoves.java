@@ -20,7 +20,7 @@ public class GameMoves {
     private String attackerId;
     private String defenderId;
     private int[][] currentState;
-    private int[] move;
-    private long move_number;
+    private Move move;
+    private long moveNumber;
     private Date timestamp;
 }

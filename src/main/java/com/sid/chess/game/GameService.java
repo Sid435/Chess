@@ -1,10 +1,14 @@
 package com.sid.chess.game;
 
+import com.sid.chess.custom_exceptions.GameRoomCreationException;
+import com.sid.chess.custom_exceptions.IllegalMoveException;
+import com.sid.chess.custom_exceptions.InvalidGameStateException;
 import com.sid.chess.gameroom.GameRoom;
 import com.sid.chess.gameroom.GameRoomRepository;
 import com.sid.chess.gameroom.GameRoomService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,68 +17,73 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GameService {
 
-    @Autowired
-    private final GameRoomService service;
+    private static final Logger logger = LoggerFactory.getLogger(GameService.class);
 
-    @Autowired
+    private final GameRoomService gameRoomService;
     private final GameRoomRepository repository;
 
     public GameRoom save(GameMoves gameMoves) {
-        var roomId = service.getGameRoomId(
-                gameMoves.getAttackerId(),
-                gameMoves.getDefenderId(),
-                true
-        ).orElseThrow();
+        String roomId = getOrCreateGameRoom(gameMoves);
+        GameRoom gameRoom = getAndValidateGameRoom(roomId, gameMoves);
 
-        Optional<GameRoom> roomPre = repository.findById(roomId);
-        if (roomPre.isPresent()) {
-            GameRoom gameRoom = roomPre.get();
-
-            if (!"ongoing".equals(gameRoom.getStatus())) {
-                throw new IllegalStateException("Game is not ongoing.");
-            }
-            if (!gameMoves.getAttackerId().equals(gameRoom.getCurrentTurn())) {
-                throw new IllegalArgumentException("It's not your turn.");
-            }
-
-            int[][] currentState = gameRoom.getGameRoomPiecesCurrentLocation();
-            int[] move = gameMoves.getMove();
-            int fromX = move[0];
-            int fromY = move[1];
-            int toX = move[2];
-            int toY = move[3];
-
-            if (isMoveWithinBounds(fromX, fromY, toX, toY)) {
-                currentState[toX][toY] = currentState[fromX][fromY];
-                currentState[fromX][fromY] = 0;
-                gameRoom.setGameRoomPiecesCurrentLocation(currentState);
-                gameRoom.setMoveCount(gameRoom.getMoveCount() + 1);
-                if (isWinningConditionMet(currentState, gameMoves.getDefenderId())) {
-                    gameRoom.setWinner(gameMoves.getAttackerId());
-                    gameRoom.setStatus("finished");
-                } else {
-                    gameRoom.setCurrentTurn(gameMoves.getDefenderId());
-                }
-                repository.save(gameRoom);
-
-                return gameRoom;
-            } else {
-                throw new IllegalArgumentException("Move is out of bounds.");
-            }
+        if (isValidMove(gameRoom, gameMoves)) {
+            updateGameState(gameRoom, gameMoves);
+            checkAndUpdateGameStatus(gameRoom, gameMoves);
+            return repository.save(gameRoom);
+        } else {
+            throw new IllegalMoveException("Invalid move.");
         }
-
-        throw new IllegalStateException("Game room not found.");
     }
 
-    private boolean isMoveWithinBounds(int fromX, int fromY, int toX, int toY) {
-        return (fromX >= 0 && fromX < 5) && (fromY >= 0 && fromY < 5) &&
-                (toX >= 0 && toX < 5) && (toY >= 0 && toY < 5);
+    private String getOrCreateGameRoom(GameMoves gameMoves) {
+        return gameRoomService.getGameRoomId(gameMoves.getAttackerId(), gameMoves.getDefenderId(), true)
+                .orElseThrow(() -> new GameRoomCreationException("Failed to create or retrieve game room."));
     }
 
-    private boolean isWinningConditionMet(int[][] boardState, String defenderId) {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                if (boardState[i][j] != 0 && isOpponentPiece(boardState[i][j], defenderId)) {
+    private GameRoom getAndValidateGameRoom(String roomId, GameMoves gameMoves) {
+        return repository.findById(roomId)
+                .filter(room -> "ongoing".equals(room.getStatus()))
+                .filter(room -> gameMoves.getAttackerId().equals(room.getCurrentTurn()))
+                .orElseThrow(() -> new InvalidGameStateException("Invalid game state or not your turn."));
+    }
+
+    private boolean isValidMove(GameRoom gameRoom, GameMoves gameMoves) {
+        Move move = gameMoves.getMove();
+        return isMoveWithinBounds(move) && isPieceMovementValid(gameRoom, move);
+    }
+
+    private boolean isMoveWithinBounds(Move move) {
+        return move.isWithinBounds(5, 5);  // Assuming 5x5 board
+    }
+
+    private boolean isPieceMovementValid(GameRoom gameRoom, Move move) {
+        String[][] boardState = gameRoom.getGameRoomPiecesCurrentLocation();
+        String piece = boardState[move.getFromX()][move.getFromY()];
+        return piece != null && PieceMovementValidator.isValidMove(piece, move);
+    }
+
+    private void updateGameState(GameRoom gameRoom, GameMoves gameMoves) {
+        Move move = gameMoves.getMove();
+        String[][] currentState = gameRoom.getGameRoomPiecesCurrentLocation();
+        currentState[move.getToX()][move.getToY()] = currentState[move.getFromX()][move.getFromY()];
+        currentState[move.getFromX()][move.getFromY()] = null;
+        gameRoom.setGameRoomPiecesCurrentLocation(currentState);
+        gameRoom.setMoveCount(gameRoom.getMoveCount() + 1);
+    }
+
+    private void checkAndUpdateGameStatus(GameRoom gameRoom, GameMoves gameMoves) {
+        if (isWinningConditionMet(gameRoom.getGameRoomPiecesCurrentLocation(), gameMoves.getDefenderId())) {
+            gameRoom.setWinner(gameMoves.getAttackerId());
+            gameRoom.setStatus("finished");
+        } else {
+            gameRoom.setCurrentTurn(gameMoves.getDefenderId());
+        }
+    }
+
+    private boolean isWinningConditionMet(String[][] boardState, String defenderId) {
+        for (String[] row : boardState) {
+            for (String piece : row) {
+                if (piece != null && isOpponentPiece(piece, defenderId)) {
                     return false;
                 }
             }
@@ -82,11 +91,12 @@ public class GameService {
         return true;
     }
 
-    public Optional<GameRoom> getGameRoomById(String roomId){
-        return repository.findGameRoomById(roomId);
+    public Optional<GameRoom> getGameRoomById(String roomId) {
+        return repository.findById(roomId);
     }
 
-    private boolean isOpponentPiece(int piece, String defenderId) {
-        return piece < 0;
+    private boolean isOpponentPiece(String piece, String defenderId) {
+        // Assuming defenderId pieces start with "B" and attackerId pieces start with "A"
+        return (piece.startsWith("A") && defenderId.startsWith("B")) || (piece.startsWith("B") && defenderId.startsWith("A"));
     }
 }
