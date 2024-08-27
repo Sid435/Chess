@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let gameRoomId = localStorage.getItem('gameRoomId');
     let currentPlayer = localStorage.getItem('username');
     let boardMatrix = [
-        ['B-P1', 'B-P2', 'B-H1', 'B-H2', 'B-P3'],
+        ['B-P1', 'B-P2', 'B-H1', 'B-H2', 'B-H3'],
         [null, null, null, null, null],
         [null, null, null, null, null],
         [null, null, null, null, null],
-        ['A-P1', 'A-P2', 'A-H1', 'A-H2', 'A-P3']
+        ['A-P1', 'A-P2', 'A-H1', 'A-H2', 'A-H3']
     ];
     let selectedPiece = null;
     let selectedIndex = null;
@@ -145,6 +145,33 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("You can't move your opponent's pieces!");
         }
     }
+        function getKnightMoves(index) {
+            const moves = [];
+            const row = Math.floor(index / 5);
+            const col = index % 5;
+            const knightMoves = [
+                { dx: -1, dy: -2 }, { dx: 1, dy: -2 },
+                { dx: -2, dy: -1 }, { dx: 2, dy: -1 },
+                { dx: -2, dy: 1 }, { dx: 2, dy: 1 },
+                { dx: -1, dy: 2 }, { dx: 1, dy: 2 }
+            ];
+
+            knightMoves.forEach(({ dx, dy }) => {
+                const newRow = row + dy;
+                const newCol = col + dx;
+                if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
+                    const newIndex = newRow * 5 + newCol;
+                    const targetPiece = boardMatrix[newRow][newCol];
+                    if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
+                        moves.push(newIndex);
+                    }
+                }
+            });
+
+            return moves;
+        }
+
+
 
     function getStraightMoves(index, val) {
         const moves = [];
@@ -197,20 +224,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return moves;
     }
+        function highlightPossibleMoves(index, piece) {
+            let moves = [];
 
-    function highlightPossibleMoves(index, piece) {
-        let moves = [];
+            if (piece.endsWith('H1')) {
+                moves = getStraightMoves(index, 2);
+            } else if (piece.endsWith('H2')) {
+                moves = getDiagonalMoves(index);
+            } else if (piece.endsWith('H3')) {
+                moves = getKnightMoves(index);
+            } else {
+                moves = getPawnMoves(index);
+            }
 
-        if (piece.endsWith('H1')) {
-            moves = getStraightMoves(index, 2);
-        } else if (piece.endsWith('H2')) {
-            moves = getDiagonalMoves(index);
-        } else {
-            moves = getPawnMoves(index);
+            moves.forEach(moveIndex => highlightCell(moveIndex, 'highlight'));
         }
-
-        moves.forEach(moveIndex => highlightCell(moveIndex, 'highlight'));
-    }
 
     function getPawnMoves(index) {
         return getStraightMoves(index, 1);

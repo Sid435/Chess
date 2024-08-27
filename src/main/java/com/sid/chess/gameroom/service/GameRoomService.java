@@ -73,16 +73,17 @@ public class GameRoomService {
     }
 
     public static boolean isValidMove(String piece, Move move) {
-        return true;
-//        if(piece.toLowerCase().endsWith("p")){
-//            return isPawnMove(move);
-//        }
-//        else if(piece.toLowerCase().endsWith("h1")){
-//            return isHero1Move(move);
-//        }
-//        else if(piece.toLowerCase().endsWith("h2")){
-//            return isHero2Move(move);
-//        }else return false;
+        if (piece.toLowerCase().contains("p")) {
+            return isPawnMove(move);
+        } else if (piece.toLowerCase().endsWith("h1")) {
+            return isHero1Move(move);
+        } else if (piece.toLowerCase().endsWith("h2")) {
+            return isHero2Move(move);
+        } else if (piece.toLowerCase().endsWith("h3")) {
+            return isHero3Move(move);
+        } else {
+            return false;
+        }
     }
 
     private static boolean isPawnMove(Move move) {
@@ -103,6 +104,11 @@ public class GameRoomService {
         return dx == 2 && dy == 2;
     }
 
+    private static boolean isHero3Move(Move move) {
+        int dx = Math.abs(move.getToX() - move.getFromX());
+        int dy = Math.abs(move.getToY() - move.getFromY());
+        return (dx == 1 && dy == 2) || (dx == 2 && dy == 1);
+    }
     public GameRoom getGameRoom(
             String attackerId,
             String defenderId,
