@@ -32,8 +32,6 @@ public class GameRoomService {
         }else{
             throw new IllegalMoveException("Move not valid!");
         }
-
-
     }
 
     private void checkGameStatus(GameRoom gameRoom) {
@@ -53,9 +51,11 @@ public class GameRoomService {
         if (!attackerHasPieces) {
             gameRoom.setStatus(GameStatus.FINISHED);
             gameRoom.setWinner(gameRoom.getDefender_id());
+            gameRoomRepository.delete(gameRoom);
         } else if (!defenderHasPieces) {
             gameRoom.setStatus(GameStatus.FINISHED);
             gameRoom.setWinner(gameRoom.getAttacker_id());
+            gameRoomRepository.delete(gameRoom);
         }
     }
 

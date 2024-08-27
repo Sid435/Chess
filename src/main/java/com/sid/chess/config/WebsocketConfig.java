@@ -1,6 +1,5 @@
 package com.sid.chess.config;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -17,7 +16,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSocketMessageBroker
-@CrossOrigin("http://localhost:63342")
+@CrossOrigin(origins = "*")
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
@@ -30,7 +29,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:63342") // Allow the specific origin
+                .setAllowedOriginPatterns("*") // Use allowedOriginPatterns instead of setAllowedOrigins
                 .withSockJS();
     }
 

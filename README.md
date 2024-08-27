@@ -63,7 +63,6 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 2. **Run the Server**
    - Navigate to the server directory and compile the Java files:
      ```bash
-     docker-compose up -d
      ./mvnw spring-boot:run
      ```
    - The server will start and listen for WebSocket connections.

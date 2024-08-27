@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (gameState.status === 'FINISHED') {
             const winner = gameState.winner === gameState.attacker_id ? 'Attacker' : 'Defender';
             alert(`Game Over! ${winner} wins!`);
+
         }
     }
        function adjustBoardForPlayer() {
