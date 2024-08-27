@@ -7,13 +7,11 @@ function connectWebSocket() {
     stompClient.connect(
         { username: localStorage.getItem('username') },
         function (frame) {
-            console.log('Connected: ' + frame);
             stompClient.subscribe('/topic/user', function (response) {
                 console.log('Received user update:', response.body);
                 updateUserList();
             });
             stompClient.subscribe(`/user/${currentUser}/queue/challenge`, function(message) {
-                console.log('Received challenge:', message.body);
                 const challenge = JSON.parse(message.body);
                 if(confirm(challenge.message)) {
                     acceptChallenge(challenge.attacker_id);
@@ -23,7 +21,6 @@ function connectWebSocket() {
             });
 
             stompClient.subscribe(`/user/${currentUser}/queue/response`, function(message) {
-                console.log('Received game response:', message.body);
                 const response = JSON.parse(message.body);
                 handleGameResponse(response);
             });
@@ -54,7 +51,7 @@ function acceptChallenge(attackerId) {
     };
     stompClient.send("/app/game_response", {}, JSON.stringify(gameResponse));
     alert(`You accepted the challenge from ${attackerId}`);
-    createGameRoomAndRedirect(attackerId, currentUser.name);
+    createGameRoomAndRedirect(attackerId, currentUser.name); //here
 }
 
 function declineChallenge(attackerId) {
@@ -68,7 +65,7 @@ function declineChallenge(attackerId) {
 }
 
 function createGameRoomAndRedirect(attackerId, defenderId) {
-    const gameRoomId = `${attackerId}_${defenderId}}`;
+    const gameRoomId = `${attackerId}_${defenderId}`;
 
     stompClient.send("/app/create_game_room", {}, JSON.stringify({
         id: gameRoomId,
@@ -81,7 +78,8 @@ function createGameRoomAndRedirect(attackerId, defenderId) {
         const gameState = JSON.parse(message.body);
         updateGameState(gameState);
     });
-
+    localStorage.setItem('attacker_id', attackerId);
+    localStorage.setItem('defender_id', defenderId);
     localStorage.setItem('gameRoomId', gameRoomId);
     window.location.href = `game.html?roomId=${gameRoomId}`;
 }
@@ -127,7 +125,7 @@ function handleGameResponse(response) {
         alert(`${response.defender_id} accepted your challenge!`);
         const pendingRequest = JSON.parse(localStorage.getItem('pendingGameRequest'));
         if (pendingRequest && pendingRequest.defender_id === response.defender_id) {
-            createGameRoomAndRedirect(currentUser.name, response.defender_id);
+            createGameRoomAndRedirect(currentUser.name, response.defender_id); //here
         } else {
             console.error('No matching pending game request found');
         }
@@ -136,6 +134,8 @@ function handleGameResponse(response) {
     }
     localStorage.removeItem('pendingGameRequest');
 }
+
+
 window.onload = connectWebSocket;
 
 window.onbeforeunload = function() {

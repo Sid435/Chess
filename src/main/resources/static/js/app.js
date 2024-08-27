@@ -1,5 +1,7 @@
+document.addEventListener("DOMContentLoaded", function () {
+
 let stompClient = null;
-let gameRoomId =  localStorage.getItem('gameRoomId');
+let gameRoomId = localStorage.getItem('gameRoomId');
 let currentPlayer = localStorage.getItem('username');
 let boardMatrix = [
     ['B-P1', 'B-P2', 'B-H1', 'B-H2', 'B-P3'],
@@ -10,17 +12,51 @@ let boardMatrix = [
 ];
 let selectedPiece = null;
 let selectedIndex = null;
+let attackerId = localStorage.getItem('attacker_id');
+let defenderId =localStorage.getItem('defender_id');
 
 function connectWebSocket() {
     const socket = new SockJS('http://localhost:8080/ws');
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    stompClient.connect({},
+    function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/game/' + gameRoomId, function (response) {
-            const gameState = JSON.parse(response.body);
-            updateGameState(gameState);
-        });
+        initializeGame();
     });
+}
+
+function initializeGame() {
+    const urlParams = new URLSearchParams(window.location.search);
+    gameRoomId = urlParams.get('roomId') || gameRoomId;
+    console.log('Game Room ID:', gameRoomId);
+    if (!gameRoomId) {
+        alert('No game room ID provided');
+        return;
+    }
+
+    stompClient.subscribe(`/topic/game/${gameRoomId}`, function(message) {
+        console.log('Received game state:', message.body);
+        const gameState = JSON.parse(message.body);
+        updateGameState(gameState);
+    });
+    game_room = {
+        id : gameRoomId
+    }
+    stompClient.send("/app/get_game_room", {}, JSON.stringify(game_room));
+
+}
+
+function updateGameState(gameState) {
+    console.log('Updating game state with:', gameState);
+    boardMatrix = gameState.current_game;
+    currentPlayer = gameState.current_id === gameState.attacker_id ? 'A' : 'B';
+    initializeBoard();
+    document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
+
+    if (gameState.status === 'FINISHED') {
+        const winner = gameState.winner === gameState.attacker_id ? 'Attacker' : 'Defender';
+        alert(`Game Over! ${winner} wins!`);
+    }
 }
 
 function initializeBoard() {
@@ -43,15 +79,33 @@ function makeMove(move) {
     stompClient.send("/app/move", {}, JSON.stringify(move));
 }
 
-function updateGameState(gameState) {
-    boardMatrix = gameState.current_game;
-    currentPlayer = gameState.current_id === gameState.attacker_id ? 'A' : 'B';
-    initializeBoard();
-    document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
+function movePieceTo(newIndex) {
+    const targetCell = document.querySelector(`.chessboard div[data-index="${newIndex}"]`);
 
-    if (gameState.status === 'FINISHED') {
-        const winner = gameState.winner === gameState.attacker_id ? 'Attacker' : 'Defender';
-        alert(`Game Over! ${winner} wins!`);
+    if (targetCell && targetCell.classList.contains('highlight')) {
+        const targetRow = Math.floor(newIndex / 5);
+        const targetCol = newIndex % 5;
+        const selectedRow = Math.floor(selectedIndex / 5);
+        const selectedCol = selectedIndex % 5;
+
+        const move = {
+            game_room_id: gameRoomId,
+            piece_type: selectedPiece,
+            attacker_id: currentPlayer === 'A' ? attackerId : defenderId,
+            defender_id: currentPlayer === 'A' ? defenderId : attackerId,
+            fromX: selectedRow,
+            fromY: selectedCol,
+            toX: targetRow,
+            toY: targetCol
+        };
+
+        makeMove(move);
+
+        selectedPiece = null;
+        selectedIndex = null;
+        document.getElementById('selected-piece').textContent = `Selected: None`;
+
+        clearHighlights();
     }
 }
 
@@ -60,6 +114,7 @@ function onCellClick(index) {
     const piece = boardMatrix[row][col];
 
     if (piece && piece.startsWith(currentPlayer)) {
+        // Select the piece
         selectedPiece = piece;
         selectedIndex = index;
         document.getElementById('selected-piece').textContent = `Selected: ${piece}`;
@@ -67,24 +122,25 @@ function onCellClick(index) {
         highlightCell(index, 'selected');
         highlightPossibleMoves(index, piece);
     } else if (document.querySelector(`.chessboard div[data-index="${index}"]`).classList.contains('highlight')) {
+        // Move the piece to the selected cell
         movePieceTo(index);
     }
 }
 
-function getStraightMoves(index) {
+function getStraightMoves(index, val) {
     const moves = [];
     const row = Math.floor(index / 5);
     const col = index % 5;
     const directions = [
-        { dx: -2, dy: 0 }, // Left
-        { dx: 2, dy: 0 },  // Right
-        { dx: 0, dy: -2 }, // Up
-        { dx: 0, dy: 2 }   // Down
+        { dx: -1, dy: 0 }, // Left
+        { dx: 1, dy: 0 },  // Right
+        { dx: 0, dy: -1 }, // Up
+        { dx: 0, dy: 1 }   // Down
     ];
 
     directions.forEach(({ dx, dy }) => {
-        const newRow = row + dy;
-        const newCol = col + dx;
+        let newRow = row + dy * val;
+        let newCol = col + dx * val;
         if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
             const newIndex = newRow * 5 + newCol;
             const targetPiece = boardMatrix[newRow][newCol];
@@ -102,15 +158,15 @@ function getDiagonalMoves(index) {
     const row = Math.floor(index / 5);
     const col = index % 5;
     const directions = [
-        { dx: -2, dy: -2 }, // Top-left
-        { dx: 2, dy: -2 },  // Top-right
-        { dx: -2, dy: 2 },  // Bottom-left
-        { dx: 2, dy: 2 }    // Bottom-right
+        { dx: -1, dy: -1 }, // Top-left
+        { dx: 1, dy: -1 },  // Top-right
+        { dx: -1, dy: 1 },  // Bottom-left
+        { dx: 1, dy: 1 }    // Bottom-right
     ];
 
     directions.forEach(({ dx, dy }) => {
-        const newRow = row + dy;
-        const newCol = col + dx;
+        let newRow = row + dy * 2;
+        let newCol = col + dx * 2;
         if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
             const newIndex = newRow * 5 + newCol;
             const targetPiece = boardMatrix[newRow][newCol];
@@ -127,46 +183,18 @@ function highlightPossibleMoves(index, piece) {
     let moves = [];
 
     if (piece.endsWith('H1')) {
-        moves = getStraightMoves(index);
+        moves = getStraightMoves(index, 2);
     } else if (piece.endsWith('H2')) {
         moves = getDiagonalMoves(index);
-    } else { // Pawn
-        moves = getStraightMoves(index).filter(moveIndex => {
-            const moveDistance = Math.abs(moveIndex - index);
-            return moveDistance === 1 || moveDistance === 5; // Pawns can move one step in straight directions
-        });
+    } else {
+        moves = getPawnMoves(index);
     }
 
     moves.forEach(moveIndex => highlightCell(moveIndex, 'highlight'));
 }
 
-function movePieceTo(newIndex) {
-    const targetRow = Math.floor(newIndex / 5);
-    const targetCol = newIndex % 5;
-    const selectedRow = Math.floor(selectedIndex / 5);
-    const selectedCol = selectedIndex % 5;
-
-    // Capture logic
-    const capturedPiece = boardMatrix[targetRow][targetCol];
-    if (capturedPiece) {
-        console.log(`${selectedPiece} captured ${capturedPiece}`);
-    }
-
-    // Move the piece in the matrix
-    boardMatrix[targetRow][targetCol] = selectedPiece;
-    boardMatrix[selectedRow][selectedCol] = null;
-
-    // Clear selection and highlights
-    selectedPiece = null;
-    selectedIndex = null;
-    document.getElementById('selected-piece').textContent = `Selected: None`;
-
-    // Switch player
-    currentPlayer = currentPlayer === 'A' ? 'B' : 'A';
-    document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
-
-    // Reinitialize the board with the new state
-    initializeBoard();
+function getPawnMoves(index) {
+    return getStraightMoves(index, 1);
 }
 
 function clearHighlights() {
@@ -181,3 +209,4 @@ function highlightCell(index, className) {
 }
 
 window.onload = connectWebSocket;
+});

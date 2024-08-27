@@ -35,9 +35,9 @@ public class GameController {
     }
 
     @MessageMapping("/get_game_room")
-    public void getGameRoom(@Payload String room_id){
-        GameRoom gameRoom = service.getGameRoomById(room_id);
-        messagingTemplate.convertAndSend("/topic/game/" + room_id, gameRoom);
+    public void getGameRoom(@Payload GameRoom game){
+        GameRoom gameRoom = service.getGameRoomById(game.getId());
+        messagingTemplate.convertAndSend("/topic/game/" + gameRoom.getId(), gameRoom);
     }
 
 }

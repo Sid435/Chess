@@ -1,8 +1,13 @@
 package com.sid.chess.gameroom.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
-@Value
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Move {
     String game_room_id;
     String piece_type;

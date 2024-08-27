@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface GameRoomRepository extends MongoRepository<GameRoom, String> {
 
-    @Query("{'attackerId' : ?0 , 'defenderId' : ?1}")
+    @Query("{'attacker_id' : ?0 , 'defender_id' : ?1}")
     Optional<GameRoom> findByAttackerIdAndDefenderId(String att_id, String def_id);
 
     @Query("{'id' : ?0}")
