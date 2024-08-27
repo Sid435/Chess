@@ -73,15 +73,16 @@ public class GameRoomService {
     }
 
     public static boolean isValidMove(String piece, Move move) {
-        if(piece.toLowerCase().endsWith("p")){
-            return isPawnMove(move);
-        }
-        else if(piece.toLowerCase().endsWith("h1")){
-            return isHero1Move(move);
-        }
-        else if(piece.toLowerCase().endsWith("h2")){
-            return isHero2Move(move);
-        }else return false;
+        return true;
+//        if(piece.toLowerCase().endsWith("p")){
+//            return isPawnMove(move);
+//        }
+//        else if(piece.toLowerCase().endsWith("h1")){
+//            return isHero1Move(move);
+//        }
+//        else if(piece.toLowerCase().endsWith("h2")){
+//            return isHero2Move(move);
+//        }else return false;
     }
 
     private static boolean isPawnMove(Move move) {

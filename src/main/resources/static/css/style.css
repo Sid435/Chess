@@ -97,3 +97,12 @@ body {
 .game-over {
     color: #ff4444;
 }
+
+
+#chessboard.flip-board {
+    transform: rotate(180deg);
+}
+
+#chessboard.flip-board div {
+    transform: rotate(180deg);
+}

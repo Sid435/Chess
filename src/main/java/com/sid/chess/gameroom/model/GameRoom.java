@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document
@@ -19,7 +20,8 @@ public class GameRoom {
     private String id;
     private String attacker_id;
     private String defender_id;
-    private List<Move> move_history;
+    @Builder.Default
+    private List<Move> move_history = new ArrayList<>();
     private String current_id;
     private String winner;
 
