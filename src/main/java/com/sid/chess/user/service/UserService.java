@@ -20,7 +20,7 @@ public class UserService {
     }
 
     public User disconnect(User user) {
-        var stored = repository.findById(user.getId())
+        var stored = repository.findById(user.getName())
                 .orElse(null);
         if (stored != null) {
             stored.setStatus(Status.OFFLINE);
@@ -30,8 +30,6 @@ public class UserService {
     }
 
     public List<User> findConnectedUsers() {
-        List<User> a =  repository.findByStatus(Status.ONLINE);
-        System.out.println(a);
-        return a;
+        return repository.findByStatus(Status.ONLINE);
     }
 }

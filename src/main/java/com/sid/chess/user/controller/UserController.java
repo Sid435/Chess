@@ -11,28 +11,44 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:63342/ws")
+@CrossOrigin(origins = "http://localhost:63342")
 public class UserController {
 
     public final UserService service;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/game_request")
-    public void sendGameRequest(@Payload GameRequest gameRequest){
-        simpMessagingTemplate.convertAndSendToUser(gameRequest.getDefender_id(), "/queue/challenge", gameRequest.getMessage());
+    public void sendGameRequest(@Payload GameRequest gameRequest) {
+        System.out.println("Request from: " + gameRequest.getAttacker_id());
+        System.out.println("Request to: " + gameRequest.getDefender_id());
+        System.out.println("Message: " + gameRequest.getMessage());
+        simpMessagingTemplate.convertAndSendToUser(
+                gameRequest.getDefender_id(),
+                "/queue/challenge",
+                GameRequest.builder()
+                        .attacker_id(gameRequest.getAttacker_id())
+                        .defender_id(gameRequest.getDefender_id())
+                        .message(gameRequest.getMessage()).build()
+        );
     }
 
     @MessageMapping("/game_response")
-    public void sendGameResponse(@Payload GameResponse gameResponse){
-        simpMessagingTemplate.convertAndSendToUser(gameResponse.getAttacker_id(), "/topic/response", gameResponse.isAccepted());
+    public void handleGameResponse(@Payload GameResponse gameResponse) {
+        simpMessagingTemplate.convertAndSendToUser(
+                gameResponse.getAttacker_id(),
+                "/queue/response",
+                gameResponse
+        );
     }
 
     @MessageMapping("/addUser")
@@ -46,7 +62,7 @@ public class UserController {
     public ResponseEntity<User> disconnectUser(@Payload User user){
         return ResponseEntity.ok(service.disconnect(user));
     }
-    @GetMapping("/getUsers")
+    @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers(){
         return ResponseEntity.ok(service.findConnectedUsers());
     }

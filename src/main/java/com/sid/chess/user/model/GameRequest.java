@@ -1,10 +1,14 @@
 package com.sid.chess.user.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Value;
+import lombok.NoArgsConstructor;
 
-@Value
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class GameRequest {
     String attacker_id;
     String defender_id;

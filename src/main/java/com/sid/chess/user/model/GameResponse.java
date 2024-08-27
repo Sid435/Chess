@@ -1,12 +1,14 @@
 package com.sid.chess.user.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Value;
+import lombok.NoArgsConstructor;
 
-@Value
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GameResponse {
     String attacker_id;
-    String receiver_id;
+    String defender_id;
     boolean accepted;
 }
