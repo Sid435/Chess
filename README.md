@@ -13,11 +13,9 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 
 ### 2. Characters and Movement
 - **Pawn:** Moves one block in any direction (Left, Right, Forward, or Backward).
-  - Move commands: `L` (Left), `R` (Right), `F` (Forward), `B` (Backward).
 - **Hero1:** Moves two blocks straight in any direction, killing any opponent's character in its path.
-  - Move commands: `L` (Left), `R` (Right), `F` (Forward), `B` (Backward).
 - **Hero2:** Moves two blocks diagonally in any direction, killing any opponent's character in its path.
-  - Move commands: `FL` (Forward-Left), `FR` (Forward-Right), `BL` (Backward-Left), `BR` (Backward-Right).
+- **Hero3:** Moves two squares in one direction and then one square perpendicular to that direction.
 - All moves are relative to the player's perspective.
 
 
