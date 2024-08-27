@@ -73,7 +73,7 @@ public class GameRoomService {
     }
 
     public static boolean isValidMove(String piece, Move move) {
-        if (piece.toLowerCase().endsWith("p")) {
+        if (piece.toLowerCase().contains("p")) {
             return isPawnMove(move);
         } else if (piece.toLowerCase().endsWith("h1")) {
             return isHero1Move(move);
