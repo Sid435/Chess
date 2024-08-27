@@ -102,20 +102,20 @@ public class GameRoomService {
         return dx == 2 && dy == 2;
     }
 
-    public Optional<String> getGameRoomId(
+    public GameRoom getGameRoom(
             String attackerId,
             String defenderId,
             boolean createGameRoomIfNotExists
     ){
-        return gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId)
-                .map(GameRoom::getId)
-                .or(()->{
-                    if(createGameRoomIfNotExists){
-                        var gameId = createGameRoom(attackerId, defenderId).getId();
-                        return Optional.of(gameId);
-                    }
-                    return Optional.empty();
-                });
+        Optional<GameRoom> gameRoom = gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId);
+        if(gameRoom.isPresent()){
+            return gameRoom.get();
+        }
+        else{
+            if(createGameRoomIfNotExists){
+                return createGameRoom(attackerId, defenderId);
+            }else throw new GameRoomNotFoundException("GameRoom doesn't exists");
+        }
     }
 
     public GameRoom createGameRoom(String attackerId, String defenderId) {

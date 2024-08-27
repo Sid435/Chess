@@ -11,12 +11,12 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.security.Principal;
+
 import java.util.List;
 
 @Controller
@@ -29,9 +29,6 @@ public class UserController {
 
     @MessageMapping("/game_request")
     public void sendGameRequest(@Payload GameRequest gameRequest) {
-        System.out.println("Request from: " + gameRequest.getAttacker_id());
-        System.out.println("Request to: " + gameRequest.getDefender_id());
-        System.out.println("Message: " + gameRequest.getMessage());
         simpMessagingTemplate.convertAndSendToUser(
                 gameRequest.getDefender_id(),
                 "/queue/challenge",

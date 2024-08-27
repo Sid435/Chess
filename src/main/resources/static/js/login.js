@@ -38,5 +38,5 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     }
 });
 
-// Connect to WebSocket when the page loads
+
 connectWebSocket();

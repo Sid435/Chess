@@ -88,3 +88,12 @@ body {
     background-color: #4CAF50;
     opacity: 0.7;
 }
+#game-status {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.game-over {
+    color: #ff4444;
+}

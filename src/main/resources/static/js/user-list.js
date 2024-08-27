@@ -22,15 +22,10 @@ function connectWebSocket() {
                 }
             });
 
-            stompClient.subscribe('/user/queue/response', function(message) {
+            stompClient.subscribe(`/user/${currentUser}/queue/response`, function(message) {
                 console.log('Received game response:', message.body);
                 const response = JSON.parse(message.body);
-                if (response.accepted) {
-                    alert(`${response.defender_id} accepted your challenge!`);
-                    // Add logic here to start the game or redirect to game page
-                } else {
-                    alert(`${response.defender_id} declined your challenge.`);
-                }
+                handleGameResponse(response);
             });
             registerUser();
         },
@@ -59,7 +54,7 @@ function acceptChallenge(attackerId) {
     };
     stompClient.send("/app/game_response", {}, JSON.stringify(gameResponse));
     alert(`You accepted the challenge from ${attackerId}`);
-    // Add logic here to start the game or redirect to game page
+    createGameRoomAndRedirect(attackerId, currentUser.name);
 }
 
 function declineChallenge(attackerId) {
@@ -72,6 +67,28 @@ function declineChallenge(attackerId) {
     alert(`You declined the challenge from ${attackerId}`);
 }
 
+function createGameRoomAndRedirect(attackerId, defenderId) {
+    const gameRoomId = `${attackerId}_${defenderId}}`;
+
+    stompClient.send("/app/create_game_room", {}, JSON.stringify({
+        id: gameRoomId,
+        attacker_id: attackerId,
+        defender_id: defenderId
+    }));
+
+    stompClient.subscribe(`/topic/game/${gameRoomId}`, function(message) {
+        console.log('Received game state:', message.body);
+        const gameState = JSON.parse(message.body);
+        updateGameState(gameState);
+    });
+
+    localStorage.setItem('gameRoomId', gameRoomId);
+    window.location.href = `game.html?roomId=${gameRoomId}`;
+}
+
+function updateGameState(gameState) {
+    console.log('Updating game state:', gameState);
+}
 function updateUserList() {
     fetch('http://localhost:8080/users')
         .then(response => response.json())
@@ -102,8 +119,23 @@ function sendGameRequest(defenderId) {
     };
     stompClient.send("/app/game_request", {}, JSON.stringify(gameRequest));
     alert(`Game request sent to ${defenderId}`);
-}
 
+    localStorage.setItem('pendingGameRequest', JSON.stringify(gameRequest));
+}
+function handleGameResponse(response) {
+    if (response.accepted) {
+        alert(`${response.defender_id} accepted your challenge!`);
+        const pendingRequest = JSON.parse(localStorage.getItem('pendingGameRequest'));
+        if (pendingRequest && pendingRequest.defender_id === response.defender_id) {
+            createGameRoomAndRedirect(currentUser.name, response.defender_id);
+        } else {
+            console.error('No matching pending game request found');
+        }
+    } else {
+        alert(`${response.defender_id} declined your challenge.`);
+    }
+    localStorage.removeItem('pendingGameRequest');
+}
 window.onload = connectWebSocket;
 
 window.onbeforeunload = function() {

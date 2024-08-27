@@ -24,7 +24,7 @@ public class GameController {
 
     @MessageMapping("/create_game_room")
     public void createGameRoom(@Payload GameRoom room){
-        GameRoom gameRoom = service.createGameRoom(room.getAttacker_id(), room.getDefender_id());
+        GameRoom gameRoom = service.getGameRoom(room.getAttacker_id(), room.getDefender_id(), true);
         messagingTemplate.convertAndSend("/topic/game/" + room.getId(), gameRoom);
     }
 

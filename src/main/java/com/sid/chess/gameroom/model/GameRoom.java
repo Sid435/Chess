@@ -22,7 +22,11 @@ public class GameRoom {
     private List<Move> move_history;
     private String current_id;
     private String winner;
+
+    @Builder.Default 
     private GameStatus status = GameStatus.ONGOING;
+
+    @Builder.Default
     private String[][] current_game = {
             {"B-P1", "B-P2", "B-P3", "B-H2", "B-H1"}, // Player 2 pieces
             { null,   null,   null,   null,   null},  // Player 1 pieces
