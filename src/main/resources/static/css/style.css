@@ -108,3 +108,7 @@ body {
 #chessboard.flip-board div {
     transform: rotate(180deg);
 }
+.spectate-mode {
+    pointer-events: none; /* Disables all interactions */
+    opacity: 0.7; /* Optional: Visually indicate spectate mode */
+}

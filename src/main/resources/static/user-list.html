@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game - Active Users</title>
+    <title>Chess Game - Active Users and Ongoing Matches</title>
     <link rel="stylesheet" href="./css/user-list.css">
 </head>
 <body>
 <div class="container">
-    <h1>Active Users</h1>
-    <div id="user-list"></div>
+    <h1>Chess Game Dashboard</h1>
+
+    <section class="active-users">
+        <h2>Active Users</h2>
+        <div id="user-list"></div>
+    </section>
+
+    <section class="ongoing-matches">
+        <h2>Ongoing Matches</h2>
+        <div id="match-list"></div>
+    </section>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="./js/user-list.js"></script>
