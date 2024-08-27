@@ -255,5 +255,51 @@ document.addEventListener("DOMContentLoaded", function () {
         if (cell) cell.classList.add(className);
     }
 
-    window.onload = connectWebSocket;
+    window.onload = function () {
+        connectWebSocket();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const spectate = urlParams.get('spectate');
+
+        if (spectate === 'true') {
+            disableGameBoardInteractions();
+        }
+    };
+
+    function disableGameBoardInteractions() {
+        document.getElementById('game-board').classList.add('spectate-mode');
+        console.log('Spectate mode activated: Board interactions disabled');
+    }
+    window.onbeforeunload = function() {
+        if (stompClient !== null && currentUser !== null) {
+            stompClient.send("/app/disconnect", {}, JSON.stringify(currentUser));
+            notifyServerGameFinished();
+        }
+    };
+
+    function notifyServerGameFinished() {
+        const gameRoomId = localStorage.getItem('gameRoomId');
+        if (gameRoomId) {
+            const gameRoom = {
+                id: gameRoomId
+            };
+            const url = 'http://localhost:8080/finish_game';
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gameRoom)
+            };
+
+            if (navigator.sendBeacon) {
+                const blob = new Blob([options.body], { type: 'application/json' });
+                navigator.sendBeacon(url, blob);
+            } else {
+                fetch(url, options).catch(error => {
+                    console.error('Error finishing game on server:', error);
+                });
+            }
+        }
+    }
 });
