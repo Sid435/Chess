@@ -19,9 +19,7 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 - **Hero2:** Moves two blocks diagonally in any direction, killing any opponent's character in its path.
   - Move commands: `FL` (Forward-Left), `FR` (Forward-Right), `BL` (Backward-Left), `BR` (Backward-Right).
 - All moves are relative to the player's perspective.
-- Move command format:
-  - For Pawn and Hero1: `<character_name>:<move>` (e.g., `P1:L`, `H1:F`).
-  - For Hero2: `<character_name>:<move>` (e.g., `H2:FL`, `H2:BR`).
+
 
 ### 3. Game Objective
 - The objective is to eliminate all of the opponent's characters or achieve a specific game-winning condition as defined in the future.
