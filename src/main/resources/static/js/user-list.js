@@ -20,6 +20,11 @@ function connectWebSocket() {
                 }
             });
 
+            stompClient.subscribe('/topic/games', function (response) {
+                console.log('Game updates received:', response.body);
+                updateOngoingList();
+            });
+
             stompClient.subscribe(`/user/${currentUser}/queue/response`, function(message) {
                 const response = JSON.parse(message.body);
                 handleGameResponse(response);
@@ -109,6 +114,33 @@ function updateUserList() {
         });
 }
 
+function updateOngoingList() {
+    fetch('http://localhost:8080/current_matches')
+        .then(response => response.json())
+        .then(matches => {
+            const matchList = document.getElementById('match-list');
+            matchList.innerHTML = '';
+
+            matches.forEach(match => {
+                const matchElement = document.createElement('div');
+                matchElement.classList.add('match-item');
+                matchElement.textContent = `${match.attacker_id} vs ${match.defender_id}`;
+
+                // When clicked, redirect to the game board in spectate mode
+                matchElement.onclick = () => watchGameRequest(match.id);
+                matchList.appendChild(matchElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching ongoing matches:', error);
+        });
+}
+
+function watchGameRequest(roomId) {
+    window.location.href = `game.html?roomId=${roomId}&spectate=true`;
+}
+
+
 function sendGameRequest(defenderId) {
     const gameRequest = {
         attacker_id: currentUser.name,
@@ -136,10 +168,40 @@ function handleGameResponse(response) {
 }
 
 
-window.onload = connectWebSocket;
+window.onload = function(){
+    connectWebSocket()
+    updateOngoingList()
+}
 
 window.onbeforeunload = function() {
     if (stompClient !== null && currentUser !== null) {
         stompClient.send("/app/disconnect", {}, JSON.stringify(currentUser));
+        notifyServerGameFinished();
     }
 };
+
+function notifyServerGameFinished() {
+    const gameRoomId = localStorage.getItem('gameRoomId');
+    if (gameRoomId) {
+        const gameRoom = {
+            id: gameRoomId
+        };
+        const url = 'http://localhost:8080/finish_game';
+        const options = {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gameRoom)
+        };
+
+        if (navigator.sendBeacon) {
+            const blob = new Blob([options.body], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+        } else {
+            fetch(url, options).catch(error => {
+                console.error('Error finishing game on server:', error);
+            });
+        }
+    }
+}

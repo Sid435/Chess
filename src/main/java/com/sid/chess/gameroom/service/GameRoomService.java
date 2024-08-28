@@ -8,6 +8,7 @@ import com.sid.chess.gameroom.model.GameStatus;
 import com.sid.chess.gameroom.model.Move;
 import com.sid.chess.gameroom.repository.GameRoomRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -139,8 +140,8 @@ public class GameRoomService {
         return gameRoom;
     }
 
-    public void finishGame(String attackerId, String defenderId){
-        Optional<GameRoom> gameRoom = gameRoomRepository.findByAttackerIdAndDefenderId(attackerId, defenderId);
+    public void finishGame(String room_id){
+        Optional<GameRoom> gameRoom = gameRoomRepository.findById(room_id);
         gameRoom.ifPresent(room -> {
             room.setStatus(GameStatus.FINISHED);
             gameRoomRepository.delete(room);
@@ -157,5 +158,11 @@ public class GameRoomService {
                 .orElseThrow(
                         () -> new GameRoomNotFoundException("Room doesn't existing!")
                 );
+    }
+
+    public List<GameRoom> findGameByStatus(GameStatus gameStatus) {
+        List<GameRoom> x =  gameRoomRepository.getGameByStatus("ONGOING");
+        System.out.println(x);
+        return x;
     }
 }
