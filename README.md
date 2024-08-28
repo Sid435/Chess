@@ -45,7 +45,7 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 
 ### Prerequisites
 
-- Java Development Kit (JDK) 8 or higher
+- Java Development Kit (JDK) 21 or higher
 - WebSocket-compatible browser (e.g., Chrome, Firefox)
 - Basic knowledge of HTML, CSS, JavaScript, and Java
 
