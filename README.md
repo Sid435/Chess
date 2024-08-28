@@ -129,13 +129,31 @@ window.onload = function () {
 };
 ```
 
+## UI/UX Workflow
+
+### 1. **Login and Dashboard**
+- **Login**: Users enter their username to log in. Successful login redirects them to the dashboard.
+- **Dashboard**: Displays "Active Users" and "Ongoing Matches" in a grid layout, updating dynamically via WebSocket.
+
+### 2. **Challenging an Opponent**
+- **Challenge Action**: Users click on an active user to send a game challenge. Confirmation is shown via modal.
+- **Receiving Challenges**: Users receive a challenge notification with options to "Accept" or "Decline".
+
+### 3. **Game Board - Active Player Mode**
+- **Game Board Display**: Shows a 5x5 grid with pieces; highlights current player’s turn.
+- **Piece Movement**: Users select pieces and see possible moves highlighted. Moves are sent via WebSocket.
+
+### 4. **Game Board - Spectator Mode**
+- **Spectating**: Users click on ongoing matches to view as spectators. Game board is shown in a non-interactive mode, updating in real-time.
+
+### 5. **Game Conclusion**
+- **End Game**: Displays game results and disables the board. All users receive the final game state update.
+
 ## Future Improvements
 
 - **Enhanced UI/UX**: Improved design and user interface for a better gaming experience.
-- **Additional Features**: Add game-winning conditions, scoring, and more advanced game mechanics.
 - **Error Handling**: More robust error handling for WebSocket connections and invalid moves.
 - **Mobile Compatibility**: Optimize for mobile devices and touch input.
-- **Expanded Spectator Features**: Allow spectators to chat, toggle between different ongoing games, and view detailed game stats.
 
 ## Contact
 
