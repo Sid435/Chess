@@ -66,6 +66,7 @@ This is a turn-based, chess-like game played on a 5x5 grid, designed for two pla
 
 3. **Run the Client**
     - Open `index.html` in a WebSocket-compatible browser.
+    - locate `index.html` at :- Chess/src.main/resources/static
     - Connect to the server and start playing.
 
 ## Spectator Mode
