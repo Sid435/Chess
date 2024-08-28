@@ -126,7 +126,6 @@ function updateOngoingList() {
                 matchElement.classList.add('match-item');
                 matchElement.textContent = `${match.attacker_id} vs ${match.defender_id}`;
 
-                // When clicked, redirect to the game board in spectate mode
                 matchElement.onclick = () => watchGameRequest(match.id);
                 matchList.appendChild(matchElement);
             });
