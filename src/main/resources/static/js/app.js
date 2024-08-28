@@ -173,73 +173,79 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    function getStraightMoves(index, val) {
-        const moves = [];
-        const row = Math.floor(index / 5);
-        const col = index % 5;
-        const directions = [
-            { dx: -1, dy: 0 }, // Left
-            { dx: 1, dy: 0 },  // Right
-            { dx: 0, dy: -1 }, // Up
-            { dx: 0, dy: 1 }   // Down
-        ];
+   function getStraightMoves(index, maxSteps) {
+       const moves = [];
+       const row = Math.floor(index / 5);
+       const col = index % 5;
+       const directions = [
+           { dx: -1, dy: 0 }, // Left
+           { dx: 1, dy: 0 },  // Right
+           { dx: 0, dy: -1 }, // Up
+           { dx: 0, dy: 1 }   // Down
+       ];
 
-        directions.forEach(({ dx, dy }) => {
-            let newRow = row + dy * val;
-            let newCol = col + dx * val;
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
-                const newIndex = newRow * 5 + newCol;
-                const targetPiece = boardMatrix[newRow][newCol];
-                if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
-                    moves.push(newIndex);
-                }
-            }
-        });
+       directions.forEach(({ dx, dy }) => {
+           for (let step = 1; step <= maxSteps; step++) {
+               let newRow = row + dy * step;
+               let newCol = col + dx * step;
+               if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
+                   const newIndex = newRow * 5 + newCol;
+                   const targetPiece = boardMatrix[newRow][newCol];
+                   if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
+                       moves.push(newIndex);
+                   }
+                   if (targetPiece) break;
+               }
+           }
+       });
 
-        return moves;
-    }
+       return moves;
+   }
 
-    function getDiagonalMoves(index) {
-        const moves = [];
-        const row = Math.floor(index / 5);
-        const col = index % 5;
-        const directions = [
-            { dx: -1, dy: -1 }, // Top-left
-            { dx: 1, dy: -1 },  // Top-right
-            { dx: -1, dy: 1 },  // Bottom-left
-            { dx: 1, dy: 1 }    // Bottom-right
-        ];
+   function getDiagonalMoves(index, maxSteps) {
+       const moves = [];
+       const row = Math.floor(index / 5);
+       const col = index % 5;
+       const directions = [
+           { dx: -1, dy: -1 }, // Top-left
+           { dx: 1, dy: -1 },  // Top-right
+           { dx: -1, dy: 1 },  // Bottom-left
+           { dx: 1, dy: 1 }    // Bottom-right
+       ];
 
-        directions.forEach(({ dx, dy }) => {
-            let newRow = row + dy * 2;
-            let newCol = col + dx * 2;
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
-                const newIndex = newRow * 5 + newCol;
-                const targetPiece = boardMatrix[newRow][newCol];
-                if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
-                    moves.push(newIndex);
-                }
-            }
-        });
+       directions.forEach(({ dx, dy }) => {
+           for (let step = 1; step <= maxSteps; step++) {
+               let newRow = row + dy * step;
+               let newCol = col + dx * step;
+               if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
+                   const newIndex = newRow * 5 + newCol;
+                   const targetPiece = boardMatrix[newRow][newCol];
+                   if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
+                       moves.push(newIndex);
+                   }
+                   if (targetPiece) break;
+               }
+           }
+       });
 
-        return moves;
-    }
-        function highlightPossibleMoves(index, piece) {
-            let moves = [];
+       return moves;
+   }
 
-            if (piece.endsWith('H1')) {
-                moves = getStraightMoves(index, 2);
-            } else if (piece.endsWith('H2')) {
-                moves = getDiagonalMoves(index);
-            } else if (piece.endsWith('H3')) {
-                moves = getKnightMoves(index);
-            } else {
-                moves = getPawnMoves(index);
-            }
+   function highlightPossibleMoves(index, piece) {
+       let moves = [];
 
-            moves.forEach(moveIndex => highlightCell(moveIndex, 'highlight'));
-        }
+       if (piece.endsWith('H1')) {
+           moves = getStraightMoves(index, 2);
+       } else if (piece.endsWith('H2')) {
+           moves = getDiagonalMoves(index, 2);
+       } else if (piece.endsWith('H3')) {
+           moves = getKnightMoves(index);
+       } else {
+           moves = getPawnMoves(index);
+       }
 
+       moves.forEach(moveIndex => highlightCell(moveIndex, 'highlight'));
+   }
     function getPawnMoves(index) {
         return getStraightMoves(index, 1);
     }

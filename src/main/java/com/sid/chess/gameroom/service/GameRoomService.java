@@ -87,23 +87,25 @@ public class GameRoomService {
         }
     }
 
+    private static boolean isHero1Move(Move move) {
+        int dx = Math.abs(move.getToX() - move.getFromX());
+        int dy = Math.abs(move.getToY() - move.getFromY());
+        return (dx == 0 && (dy == 1 || dy == 2)) || (dy == 0 && (dx == 1 || dx == 2));
+    }
+
+    private static boolean isHero2Move(Move move) {
+        int dx = Math.abs(move.getToX() - move.getFromX());
+        int dy = Math.abs(move.getToY() - move.getFromY());
+        return dx == dy && (dx == 1 || dx == 2);
+    }
+
     private static boolean isPawnMove(Move move) {
         int dx = Math.abs(move.getToX() - move.getFromX());
         int dy = Math.abs(move.getToY() - move.getFromY());
         return dx + dy == 1;
     }
 
-    private static boolean isHero1Move(Move move) {
-        int dx = Math.abs(move.getToX() - move.getFromX());
-        int dy = Math.abs(move.getToY() - move.getFromY());
-        return (dx == 2 && dy == 0) || (dx == 0 && dy == 2);
-    }
 
-    private static boolean isHero2Move(Move move) {
-        int dx = Math.abs(move.getToX() - move.getFromX());
-        int dy = Math.abs(move.getToY() - move.getFromY());
-        return dx == 2 && dy == 2;
-    }
 
     private static boolean isHero3Move(Move move) {
         int dx = Math.abs(move.getToX() - move.getFromX());
