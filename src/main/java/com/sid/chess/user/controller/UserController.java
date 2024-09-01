@@ -49,7 +49,7 @@ public class UserController {
     }
 
     @MessageMapping("/addUser")
-    @SendTo("/topic/user") // will be sent to all the users who have subscribed to this endpoint
+    @SendTo("/topic/user")
     public ResponseEntity<User> postUser(@Payload User user){
         return ResponseEntity.ok(service.addUser(user));
     }

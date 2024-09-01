@@ -163,8 +163,6 @@ public class GameRoomService {
     }
 
     public List<GameRoom> findGameByStatus(GameStatus gameStatus) {
-        List<GameRoom> x =  gameRoomRepository.getGameByStatus("ONGOING");
-        System.out.println(x);
-        return x;
+        return gameRoomRepository.getGameByStatus("ONGOING");
     }
 }
