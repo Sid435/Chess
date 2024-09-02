@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateGameState(gameState) {
         console.log('Updating game state with:', gameState);
         boardMatrix = gameState.current_game;
+        updateMoveHistory(gameState.move_history)
         currentPlayer = gameState.current_id === gameState.attacker_id ? 'A' : 'B';
         initializeBoard();
         document.getElementById('current-player').textContent = `Current Player: ${currentPlayer}`;
@@ -59,14 +60,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
     }
-       function adjustBoardForPlayer() {
-            if (localStorage.getItem('username') === defenderId) {
-                chessboard.classList.add('flip-board');
-            } else {
-                chessboard.classList.remove('flip-board');
-            }
-
+    function adjustBoardForPlayer() {
+        if (localStorage.getItem('username') === defenderId) {
+            chessboard.classList.add('flip-board');
+        } else {
+            chessboard.classList.remove('flip-board');
         }
+
+    }
 
     function initializeBoard() {
         const chessboard = document.getElementById('chessboard');
@@ -127,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
                                     (currentPlayer === 'B' && localStorage.getItem('username') === defenderId);
 
         if (piece && piece.startsWith(currentPlayer) && isCurrentPlayerTurn) {
-
             selectedPiece = piece;
             selectedIndex = index;
             document.getElementById('selected-piece').textContent = `Selected: ${piece}`;
@@ -135,53 +135,47 @@ document.addEventListener("DOMContentLoaded", function () {
             highlightCell(index, 'selected');
             highlightPossibleMoves(index, piece);
         } else if (document.querySelector(`.chessboard div[data-index="${index}"]`).classList.contains('highlight')) {
-
             movePieceTo(index);
         } else if (piece && !isCurrentPlayerTurn) {
-
             alert("It's not your turn!");
         } else if (piece && !piece.startsWith(currentPlayer)) {
-
             alert("You can't move your opponent's pieces!");
         }
     }
-        function getKnightMoves(index) {
-            const moves = [];
-            const row = Math.floor(index / 5);
-            const col = index % 5;
-            const knightMoves = [
-                { dx: -1, dy: -2 }, { dx: 1, dy: -2 },
-                { dx: -2, dy: -1 }, { dx: 2, dy: -1 },
-                { dx: -2, dy: 1 }, { dx: 2, dy: 1 },
-                { dx: -1, dy: 2 }, { dx: 1, dy: 2 }
-            ];
+    function getKnightMoves(index) {
+        const moves = [];
+        const row = Math.floor(index / 5);
+        const col = index % 5;
+        const knightMoves = [
+            { dx: -1, dy: -2 }, { dx: 1, dy: -2 },
+            { dx: -2, dy: -1 }, { dx: 2, dy: -1 },
+            { dx: -2, dy: 1 }, { dx: 2, dy: 1 },
+            { dx: -1, dy: 2 }, { dx: 1, dy: 2 }
+        ];
 
-            knightMoves.forEach(({ dx, dy }) => {
-                const newRow = row + dy;
-                const newCol = col + dx;
-                if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
-                    const newIndex = newRow * 5 + newCol;
-                    const targetPiece = boardMatrix[newRow][newCol];
-                    if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
-                        moves.push(newIndex);
-                    }
+        knightMoves.forEach(({ dx, dy }) => {
+            const newRow = row + dy;
+            const newCol = col + dx;
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5) {
+                const newIndex = newRow * 5 + newCol;
+                const targetPiece = boardMatrix[newRow][newCol];
+                if (!targetPiece || targetPiece.startsWith(currentPlayer === 'A' ? 'B' : 'A')) {
+                    moves.push(newIndex);
                 }
-            });
+            }
+        });
 
-            return moves;
-        }
-
-
-
+        return moves;
+    }
    function getStraightMoves(index, maxSteps) {
        const moves = [];
        const row = Math.floor(index / 5);
        const col = index % 5;
        const directions = [
-           { dx: -1, dy: 0 }, // Left
-           { dx: 1, dy: 0 },  // Right
-           { dx: 0, dy: -1 }, // Up
-           { dx: 0, dy: 1 }   // Down
+           { dx: -1, dy: 0 },
+           { dx: 1, dy: 0 },
+           { dx: 0, dy: -1 },
+           { dx: 0, dy: 1 }
        ];
 
        directions.forEach(({ dx, dy }) => {
@@ -207,10 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
        const row = Math.floor(index / 5);
        const col = index % 5;
        const directions = [
-           { dx: -1, dy: -1 }, // Top-left
-           { dx: 1, dy: -1 },  // Top-right
-           { dx: -1, dy: 1 },  // Bottom-left
-           { dx: 1, dy: 1 }    // Bottom-right
+           { dx: -1, dy: -1 },
+           { dx: 1, dy: -1 },
+           { dx: -1, dy: 1 },
+           { dx: 1, dy: 1 }
        ];
 
        directions.forEach(({ dx, dy }) => {
@@ -276,6 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('game-board').classList.add('spectate-mode');
         console.log('Spectate mode activated: Board interactions disabled');
     }
+
     window.onbeforeunload = function() {
         if (stompClient !== null && currentUser !== null) {
             stompClient.send("/app/disconnect", {}, JSON.stringify(currentUser));
@@ -308,4 +303,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+
+    function updateMoveHistory(moves) {
+        const moveList = document.getElementById('move-list');
+        moveList.innerHTML = '';
+
+        moves.forEach(move => {
+            const li = document.createElement('li');
+            li.textContent = `${move.piece_type} moved from (${move.fromX}, ${move.fromY}) to (${move.toX}, ${move.toY})`;
+                if (move.attacker_id === 'Sid') { // Assuming 'Sid' is Player A
+                    li.classList.add('player-a-move');
+                } else if (move.attacker_id === 'Aryan') { // Assuming 'Aryan' is Player B
+                    li.classList.add('player-b-move');
+                }
+            moveList.appendChild(li);
+        });
+    }
+
 });

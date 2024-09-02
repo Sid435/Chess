@@ -30,11 +30,11 @@ public class GameRoom {
 
     @Builder.Default
     private String[][] current_game = {
-            {"B-P1", "B-P2", "B-H3", "B-H2", "B-H1"}, // Player 2 pieces
-            { null,   null,   null,   null,   null},  // Player 1 pieces
-            { null,   null,   null,   null,   null},  // Player 1 pieces
-            { null,   null,   null,   null,   null},  // Player 1 pieces
-            {"A-P1", "A-P2", "A-H3", "A-H2", "A-H1"}, // Player 2 pieces
+            {"B-P1", "B-P2", "B-H3", "B-H2", "B-H1"},
+            { null,   null,   null,   null,   null},
+            { null,   null,   null,   null,   null},
+            { null,   null,   null,   null,   null},
+            {"A-P1", "A-P2", "A-H3", "A-H2", "A-H1"}
     };
 
 }
