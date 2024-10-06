@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chess Game Login</title>
+        <link rel="stylesheet" href="./css/login.css">
+    </head>
+    <body>
+    <div class="login-container">
+        <h2>Chess Game Login</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Enter your username" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="status"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="./js/login.js"></script>
+    </body>
+</html>
