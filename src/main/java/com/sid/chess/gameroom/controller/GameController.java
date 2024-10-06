@@ -58,10 +58,5 @@ public class GameController {
         service.finishGame(gameRoom.getId());
     }
 
-    @GetMapping("/ping")
-    public ResponseEntity<String> testMapp(){
-        System.out.println("this");
-        return ResponseEntity.ok("pong");
-    }
 
 }
