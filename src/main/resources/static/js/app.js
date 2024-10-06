@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let defenderId =localStorage.getItem('defender_id');
 
     function connectWebSocket() {
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS('https://chess-9m89.onrender.com/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({},
         function (frame) {
