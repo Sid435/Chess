@@ -12,10 +12,10 @@ EXPOSE 8080
 # ENV SPRING_PROFILES_ACTIVE=prod
 
 # Copy the built JAR file from the target directory to the container's file system
-COPY target/*.jar app.jar
+COPY target/*.jar Chess-0.0.1-SNAPSHOT.jar
 
 # Define the entrypoint command to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "/Chess-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "Chess-0.0.1-SNAPSHOT.jar"]
 
 # Optional: Add a health check to ensure the application is running
 # Uncomment the following lines if you have an endpoint like /actuator/health
