@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: go-fiber
+    env: go
+    buildCommand: go build -o main .
+    startCommand: ./main
