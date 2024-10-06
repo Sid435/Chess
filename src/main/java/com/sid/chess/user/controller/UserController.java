@@ -41,6 +41,7 @@ public class UserController {
 
     @GetMapping("/ping")
     public ResponseEntity<String> testMapp(){
+        System.out.println("this");
         return ResponseEntity.ok("pong");
     }
 
