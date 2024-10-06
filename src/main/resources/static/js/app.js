@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
         moves.forEach(move => {
             const li = document.createElement('li');
             li.textContent = `${move.piece_type} moved from (${move.fromX}, ${move.fromY}) to (${move.toX}, ${move.toY})`;
-                if (move.attacker_id === attacker_id) {
+                if (move.attacker_id === attacker_id) {w
                     li.classList.add('player-a-move');
                 } else if (move.attacker_id === defender_id) {
                     li.classList.add('player-b-move');

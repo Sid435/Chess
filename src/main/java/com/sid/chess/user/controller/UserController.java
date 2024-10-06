@@ -39,6 +39,11 @@ public class UserController {
         );
     }
 
+    @GetMapping("/ping")
+    public ResponseEntity<String> testMapp(){
+        return ResponseEntity.ok("pong");
+    }
+
     @MessageMapping("/game_response")
     public void handleGameResponse(@Payload GameResponse gameResponse) {
         simpMessagingTemplate.convertAndSendToUser(

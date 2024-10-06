@@ -2,7 +2,7 @@ let stompClient = null;
 let currentUser = localStorage.getItem('username');
 
 function connectWebSocket() {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('https://chess-9m89.onrender.com/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect(
         { username: localStorage.getItem('username') },
@@ -93,7 +93,7 @@ function updateGameState(gameState) {
     console.log('Updating game state:', gameState);
 }
 function updateUserList() {
-    fetch('http://localhost:8080/users')
+    fetch('https://chess-9m89.onrender.com/users')
         .then(response => response.json())
         .then(users => {
             const userList = document.getElementById('user-list');
@@ -115,7 +115,7 @@ function updateUserList() {
 }
 
 function updateOngoingList() {
-    fetch('http://localhost:8080/current_matches')
+    fetch('https://chess-9m89.onrender.com/current_matches')
         .then(response => response.json())
         .then(matches => {
             const matchList = document.getElementById('match-list');
@@ -185,7 +185,7 @@ function notifyServerGameFinished() {
         const gameRoom = {
             id: gameRoomId
         };
-        const url = 'http://localhost:8080/finish_game';
+        const url = 'https://chess-9m89.onrender.com/finish_game';
         const options = {
             method: 'DELETE',
             headers: {
