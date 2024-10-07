@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let defenderId =localStorage.getItem('defender_id');
 
     function connectWebSocket() {
-        const socket = new SockJS('https://chess-9m89.onrender.com/ws');
+        const socket = new SockJS('http://localhost:8080/ws');
         stompClient = Stomp.over(socket);
         stompClient.connect({},
         function (frame) {
@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const gameRoom = {
                 id: gameRoomId
             };
-            const url = 'https://chess-9m89.onrender.com/finish_game';
+            const url = 'http://localhost:8080/finish_game';
             const options = {
                 method: 'DELETE',
                 headers: {
@@ -311,9 +311,9 @@ document.addEventListener("DOMContentLoaded", function () {
         moves.forEach(move => {
             const li = document.createElement('li');
             li.textContent = `${move.piece_type} moved from (${move.fromX}, ${move.fromY}) to (${move.toX}, ${move.toY})`;
-                if (move.attacker_id === attacker_id) {w
+                if (move.attacker_id === 'Sid') { // Assuming 'Sid' is Player A
                     li.classList.add('player-a-move');
-                } else if (move.attacker_id === defender_id) {
+                } else if (move.attacker_id === 'Aryan') { // Assuming 'Aryan' is Player B
                     li.classList.add('player-b-move');
                 }
             moveList.appendChild(li);
