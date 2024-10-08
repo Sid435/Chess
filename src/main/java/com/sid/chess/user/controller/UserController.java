@@ -64,4 +64,8 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers(){
         return ResponseEntity.ok(service.findConnectedUsers());
     }
+    @GetMapping("/health")
+    public ResponseEntity<String> testMap(){
+        return ResponseEntity.ok("Service is up!!");
+    }
 }
