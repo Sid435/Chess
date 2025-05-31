@@ -8,7 +8,6 @@ import com.sid.chess.gameroom.model.GameStatus;
 import com.sid.chess.gameroom.model.Move;
 import com.sid.chess.gameroom.repository.GameRoomRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

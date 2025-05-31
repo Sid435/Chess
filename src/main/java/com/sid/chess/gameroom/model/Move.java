@@ -3,7 +3,6 @@ package com.sid.chess.gameroom.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 
 @AllArgsConstructor
 @NoArgsConstructor
